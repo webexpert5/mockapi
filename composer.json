@@ -1,0 +1,13 @@
+{
+    "require": {
+        "slim/slim": "^3.0"
+    },
+    "autoload": {
+		"classmap": [
+            "src"
+        ],
+        "psr-4": {
+            "Package\\": "src/Controllers/MockApiController.php/"
+        }
+    }
+}
