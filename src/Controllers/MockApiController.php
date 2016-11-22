@@ -54,8 +54,44 @@ class MockApiController implements MockApiInterface{
     }
       
     public function cancelorder($request, $response, $args) {
-		 $input = $request->getBody();
-		print_r($input);
+		 $bodyArr = $request->getParsedBody();
+		 $order_id  = $bodyArr['orderid'];
+		 try {
+		  if(!empty($order_id) && is_numeric($order_id)){
+			 $query =  $this->dbService->prepare("UPDATE orders SET order_status= 2 WHERE order_id=".$order_id."");
+			 $query->execute();
+			 $res = array('msg'=>'order has been updated');
+			 return $response->withJson($res);
+		  }else{
+			   return $response->withJson('Please enter numeric id');
+		  }
+		}catch(\PDOException $e) {
+			echo '{"error":{"text":'. $e->getMessage() .'}}';
+		}
    }
+   
+    public function get_cancelorder($request, $response, $args) {
+		 try {
+			if(is_numeric($args['orderid'])){
+				 $order_id = $args['orderid'];
+				 $query =  $this->dbService->prepare("UPDATE orders SET order_status= 1 WHERE order_id=".$order_id."");
+				 $query->execute();
+				 $query_1 = $this->dbService->prepare("SELECT * FROM orders where order_id=".$order_id."");
+				 $query_1->execute();
+			     $arr = $query_1->fetch();
+			     if($arr['order_status'] == '1'){
+					 $res = array('msg'=>'order has been updated');
+					 return $response->withJson($res);
+				 }else{
+					 $res = array('msg'=>'no order found to update');
+					 return $response->withJson($res);
+				 }
+			}else{
+				 return $response->withJson('Please enter numeric id');
+			}
+		}catch(\PDOException $e) {
+			echo '{"error":{"text":'. $e->getMessage() .'}}';
+		}
+	}
 }
 
